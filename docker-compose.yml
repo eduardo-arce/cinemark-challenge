@@ -1,0 +1,71 @@
+services:
+
+  mongodb:
+    image: mongo:7
+    container_name: cinemark-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: cinemark-redis
+    ports:
+      - "6379:6379"
+
+  localstack:
+    image: localstack/localstack:3
+    container_name: cinemark-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs
+      DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+  movie-catalog-api:
+    build:
+      context: .
+      dockerfile: MovieCatalog.Api/Dockerfile
+    container_name: cinemark-movie-catalog-api
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      MongoSettings__ConnectionString: "mongodb://admin:admin123@mongodb:27017"
+      MongoSettings__DatabaseName: cinemark
+      RedisSettings__ConnectionString: "redis:6379"
+      SqsSettings__ServiceUrl: "http://localstack:4566"
+      SqsSettings__QueueName: film-events
+      SqsSettings__Region: us-east-1
+    depends_on:
+      - mongodb
+      - redis
+      - localstack
+
+  notification-worker:
+    build:
+      context: .
+      dockerfile: Notification.Worker/Dockerfile
+    container_name: cinemark-notification-worker
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SqsSettings__ServiceUrl: "http://localstack:4566"
+      SqsSettings__QueueName: film-events
+      SqsSettings__Region: us-east-1
+    depends_on:
+      - localstack
+
+volumes:
+  mongodb_data:
+  localstack_data:
