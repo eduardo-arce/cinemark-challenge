@@ -234,7 +234,6 @@ Para rodar um projeto de teste específico:
 
 ```bash
 dotnet test MovieCatalog.Test/MovieCatalog.Test.csproj
-dotnet test Notification.Test/Notification.Test.csproj
 ```
 
 Para rodar uma classe específica:
@@ -257,7 +256,6 @@ dotnet test --filter "FullyQualifiedName~FilmCreateValidatorTests"
 | Services | `FilmDeleteServiceTests` | 4 |
 | Domain | `FilmEntityTests` | 5 |
 | Mappers | `FilmMapperExtensionsTests` | 6 |
-
 
 ## Cobertura de testes
 
@@ -327,5 +325,3 @@ docker compose up -d --build movie-catalog-api
 | Porta | `6379` |
 
 As chaves de cache seguem o padrão `cinemark:films:*`.
-#   c i n e m a r k - c h a l l e n g e  
- 
